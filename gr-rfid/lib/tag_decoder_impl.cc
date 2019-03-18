@@ -26,6 +26,10 @@
 #include <gnuradio/prefs.h>
 #include <gnuradio/math.h>
 #include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
 #include <sys/time.h>
 #include "tag_decoder_impl.h"
 
@@ -351,6 +355,19 @@ namespace gr {
               result += std::pow(2,7-i) * EPC_bits[104+i] ;
             }
             GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << result);
+            // Adam Laurie
+            // show full 96 bit ID
+            // first 2 bytes are not part of EPC
+            std::cout << "+ ";
+            for(unsigned int j = 2, id0= 0 ; j < 14 ; ++j)
+              {
+              for(int i = 0 ; i < 8 ; ++i)
+                id0 += std::pow(2,7-i) * EPC_bits[8 * j + i] ;
+              std::cout << std::hex << std::setw(2) << std::setfill('0') << id0;
+              if(j < 13)
+                std::cout << "-";
+              }
+            std::cout << std::dec << " +" << std::flush;
 
             // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
             std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(result);
@@ -384,6 +401,8 @@ namespace gr {
 
             
             GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");  
+            // Adam Laurie
+            std::cout << "!";
           }
         }
         else

@@ -189,6 +189,9 @@ namespace gr {
       }
 
       std::cout << " --------------------------" << std::endl;
+      // Adam Laurie
+      // Force re-start
+      reader_state->gen2_logic_status= START;
     }
 
     void
