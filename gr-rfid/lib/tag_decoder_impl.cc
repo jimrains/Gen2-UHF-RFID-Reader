@@ -359,8 +359,10 @@ namespace gr {
             // show full 96 bit ID
             // first 2 bytes are not part of EPC
             std::cout << "+ ";
-            for(unsigned int j = 2, id0= 0 ; j < 14 ; ++j)
+            unsigned int id0;
+            for(int j = 2 ; j < 14 ; ++j)
               {
+              id0= 0;
               for(int i = 0 ; i < 8 ; ++i)
                 id0 += std::pow(2,7-i) * EPC_bits[8 * j + i] ;
               std::cout << std::hex << std::setw(2) << std::setfill('0') << id0;
