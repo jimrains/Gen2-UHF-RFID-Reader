@@ -132,6 +132,44 @@ misc/code).
 
 After termination, part of EPC message (hex value of EPC[104:111]) of identified Tags is printed.  
 
+A successful run should look something like:
+
+```
+$ sudo nice -n -20 python ./reader-bladerf.py 
+gr-osmosdr v0.1.4-127-g4d83c606 (0.1.5git) gnuradio 3.7.13.4
+built-in source types: file fcd rtl rtl_tcp uhd hackrf bladerf rfspace airspy redpitaya 
+[bladeRF common] init: DEBUG: entering initialization
+[bladeRF source] init: Opening Nuand bladeRF with device identifier string '*:instance=0'
+[bladeRF source] Device: Nuand bladeRF Serial # f342...2f1a FW v2.3.1 FPGA v0.10.2
+[bladeRF source] init: Clamping "transfers" to 1. Try using a smaller "transfers" value if timeouts occur.
+[bladeRF source] init: Buffers: 2, samples per buffer: 1024, active transfers: 1
+[bladeRF source] bladerf_source_c: DEBUG: initialization complete
+gr-osmosdr v0.1.4-127-g4d83c606 (0.1.5git) gnuradio 3.7.13.4
+built-in sink types: uhd hackrf bladerf redpitaya file 
+[bladeRF common] init: DEBUG: entering initialization
+[bladeRF sink] init: Opening Nuand bladeRF with device identifier string '*:instance=0'
+[bladeRF sink] Device: Nuand bladeRF Serial # f342...2f1a FW v2.3.1 FPGA v0.10.2
+[bladeRF sink] init: Clamping "transfers" to 1. Try using a smaller "transfers" value if timeouts occur.
+[bladeRF sink] init: Buffers: 2, samples per buffer: 1024, active transfers: 1
+[bladeRF sink] bladerf_sink_c: DEBUG: initialization complete
+[INFO @ host/libraries/libbladeRF/src/board/bladerf1/bladerf1.c:1962] Clamping bandwidth to 1500000 Hz
+[bladeRF source] start: DEBUG: starting source
+[bladeRF sink] start: DEBUG: starting sink
+<ENTER> to re-start, 'Q' to quit 
+!!!!!!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 ++ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!!!!!!!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +!!+ e2-e2-123-168-1df-1ed-1ee-24f-260-290-331-332 +
+!!
+ --------------------------
+| Number of queries/queryreps sent : 272
+| Current Inventory round : 273
+ --------------------------
+| Correctly decoded EPC : 73
+| Number of unique tags : 1
+| Tag ID : 1  Num of reads : 73
+ --------------------------
+<ENTER> to re-start, 'Q' to quit 
+```
+
+
 - Offline:  
     Change DEBUG variable in apps/reader.py to TRUE (A test file already exists named file_source_test).  
     The reader works with offline traces without using a USRP.  
