@@ -11,7 +11,7 @@ From looking at multiple versions and derivations of this project it became clea
 
 After banging my head against that particular brick wall for a couple of weeks, I went right back to the original project, and there it was, in green and black (I'm an old school glass-tty boy):
 
-Reducing Latency:
+	Reducing Latency:
 
 	 Reliably meeting the timing requirements of the Gen 2 protocol is
 	 difficult using the standard USRP/GNURadio configuration. This is
@@ -36,8 +36,10 @@ So unless you'd patched your gnuradio installation to do special USB handling fo
 
 Happily, with the bladeRF, we have some simple parameters to control the buffering so we can fix this with a command line argument instead of having to patch code, so we simply do this when iterating our source/sink:
 
+```
   self.source = osmosdr.source( args="numchan=" + str(1) + " " + 'bladerf=0,buffers=2,buflen=1024' )
   self.sink = osmosdr.sink( args="numchan=" + str(1) + " " + 'bladerf=0,buffers=2,buflen=1024' )
+```
 
 The default is 32 buffers of 4K and we've reduced them to 2 buffers of 1K which is the minimum and seems to be enough to do the trick.
   
