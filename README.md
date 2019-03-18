@@ -125,7 +125,7 @@ sudo GR_SCHEDULER=STS nice -n -20 python ./reader.py
 
 Note: if you get a core dump try running without 'GR_SCHEDULER=STS'. This is probably not ideal but seems to work!
 
-Hitting <ENTER> will force the reader back into 'START' mode, or 'Q' will quit. EPC codes will be printed out in realtime
+Hitting \<ENTER> will force the reader back into 'START' mode, or 'Q' will quit. EPC codes will be printed out in realtime
 as they are read, and a failed decode is signified by a '!' being printed (these are normally caused by non-response from
 TAG rather than an incorrectly decoded response as can be observed by plotting the 'source' output using the scripts in
 misc/code).
