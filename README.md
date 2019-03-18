@@ -215,7 +215,11 @@ Run the software for a few seconds (~5s). A file will be created in misc/data di
 - /misc/data/decoder  
 - /misc/data/reader
     
+A good read should look like this (plot generated with Octave from 'misc/data/source'):
 
+![UHF Backscatter](uhf-annotated.png)
+
+If you are missing the EPC traces the most likely cause is a timing issue within the 'CRITICAL TIMING' section, as described above.
     
 ## Hardware:
 
