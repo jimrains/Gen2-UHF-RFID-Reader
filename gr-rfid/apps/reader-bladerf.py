@@ -48,6 +48,11 @@ class reader_top_block(gr.top_block):
 
     #rt = gr.enable_realtime_scheduling() 
 
+    # Adam Laurie
+    self.select = True                  # set to True to use SELECT before QUERY
+    #self.mask = '111'                   # SELECT bit mask (up to 16 bits, e.g. '10100'). empty mask matches all tags.
+    self.mask = ''
+
     ######## Variables #########
     self.dac_rate = 1e6                 # DAC rate 
     self.adc_rate = 100e6/50            # ADC rate (2MS/s complex samples)
@@ -76,7 +81,7 @@ class reader_top_block(gr.top_block):
     self.matched_filter = filter.fir_filter_ccc(self.decim, self.num_taps);
     self.gate            = rfid.gate(int(self.adc_rate/self.decim))
     self.tag_decoder    = rfid.tag_decoder(int(self.adc_rate/self.decim))
-    self.reader          = rfid.reader(int(self.adc_rate/self.decim),int(self.dac_rate))
+    self.reader          = rfid.reader(int(self.adc_rate/self.decim),int(self.dac_rate),self.select,self.mask)
     self.amp              = blocks.multiply_const_ff(self.ampl)
     self.to_complex      = blocks.float_to_complex()
 

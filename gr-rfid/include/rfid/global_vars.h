@@ -29,8 +29,8 @@ namespace gr {
   namespace rfid {
 
     enum STATUS               {RUNNING, TERMINATED};
-    enum GEN2_LOGIC_STATUS  {SEND_QUERY, SEND_ACK, SEND_QUERY_REP, IDLE, SEND_CW, START, SEND_QUERY_ADJUST, SEND_NAK_QR, SEND_NAK_Q, POWER_DOWN}; 
-    enum GATE_STATUS        {GATE_OPEN, GATE_CLOSED, GATE_SEEK_RN16, GATE_SEEK_EPC};  
+    enum GEN2_LOGIC_STATUS  {SEND_SELECT, SEND_QUERY, SEND_ACK, SEND_QUERY_REP, IDLE, SEND_CW, START, SEND_QUERY_ADJUST, SEND_NAK_QR, SEND_NAK_Q, POWER_DOWN};
+    enum GATE_STATUS        {GATE_OPEN, GATE_CLOSED, GATE_SEEK_RN16, GATE_SEEK_EPC};
     enum DECODER_STATUS     {DECODER_DECODE_RN16, DECODER_DECODE_EPC};
     
     struct READER_STATS
@@ -91,6 +91,8 @@ namespace gr {
     const int P_DOWN_D     = 2000;    // power down
     const int T1_D         = 240;    // Time from Interrogator transmission to Tag response (250 us)
     const int T2_D         = 480;    // Time from Tag response to Interrogator transmission. Max value = 20.0 * T_tag = 500us 
+    const int T4_D         = 144;    // Minimum time between Interrogator commands = 2 x RTcal
+    const int TS_D         = 1500;   // TAG settling time (wakeup)
     const int PW_D         = 12;      // Half Tari 
     const int DELIM_D       = 12;      // A preamble shall comprise a fixed-length start delimiter 12.5us +/-5%
     const int TRCAL_D     = 200;    // BLF = DR/TRCAL => 40e3 = 8/TRCAL => TRCAL = 200us
@@ -111,15 +113,25 @@ namespace gr {
     const float TAG_BIT_D   = 1.0/T_READER_FREQ * pow(10,6); // Duration in us
     const int RN16_D        = (RN16_BITS + TAG_PREAMBLE_BITS) * TAG_BIT_D;
     const int EPC_D          = (EPC_BITS  + TAG_PREAMBLE_BITS) * TAG_BIT_D;
-    // Query command 
-    const int QUERY_CODE[4] = {1,0,0,0};
-    const int M[2]          = {0,0};
-    const int SEL[2]         = {0,0};
-    const int SESSION[2]     = {0,0};
-    const int TARGET         = 0;
-    const int TREXT         = 0;
-    const int DR            = 0;
 
+    // Query command (Q is set in code)
+    const int QUERY_CODE[4] = {1,0,0,0};  // QUERY command
+    const int DR            = 0;          // TRcal divide ratio
+    const int M[2]          = {0,0};      // cycles per symbol
+    const int TREXT         = 0;          // pilot tone
+    const int SEL_ALL[2]    = {0,0};      // which Tags respond to the Query: ALL TAGS
+    const int SEL_SL[2]     = {1,1};      // which Tags respond to the Query: SELECTED TAGS
+    const int SESSION[2]    = {0,0};      // session for the inventory round
+    const int TARGET        = 0;          // inventoried flag is A or B
+
+    // Adam Laurie
+    // Select command (mask and length will be set in code)
+    const int SELECT_CODE[4]     = {1,0,1,0};         // SELECT command
+    const int SELECT_TARGET[3]   = {1,0,0};           // SL
+    const int SELECT_ACTION[3]   = {0,0,0};           // assert if matching, de-assert if non-matching
+    const int SELECT_MEM[2]      = {0,1};             // EPC memory bank
+    const int SELECT_POINT[8]    = {0,0,1,0,0,0,0,0}; // memory pointer to EPC MSB (0x20)
+    const int SELECT_TRUNC       = 0;                 // no truncate
 
     const int NAK_CODE[8]   = {1,1,0,0,0,0,0,0};
 

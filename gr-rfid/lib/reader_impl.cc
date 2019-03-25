@@ -25,22 +25,28 @@
 #include <gnuradio/io_signature.h>
 #include "reader_impl.h"
 #include "rfid/global_vars.h"
+#include "crc_t.h"
 #include <sys/time.h>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
 
 namespace gr {
   namespace rfid {
 
     reader::sptr
-    reader::make(int sample_rate, int dac_rate)
+    reader::make(int sample_rate, int dac_rate, bool select, const std::string &select_mask)
     {
       return gnuradio::get_initial_sptr
-        (new reader_impl(sample_rate,dac_rate));
+        (new reader_impl(sample_rate,dac_rate,select,select_mask));
     }
 
     /*
      * The private constructor
      */
-    reader_impl::reader_impl(int sample_rate, int dac_rate)
+    reader_impl::reader_impl(int sample_rate, int dac_rate, bool select, const std::string &select_mask)
       : gr::block("reader",
               gr::io_signature::make( 1, 1, sizeof(float)),
               gr::io_signature::make( 1, 1, sizeof(float)))
@@ -68,17 +74,25 @@ namespace gr {
       // CW waveforms of different sizes
       n_cwquery_s   = (T1_D+T2_D+RN16_D)/sample_d;     //RN16
       n_cwack_s     = (3*T1_D+T2_D+EPC_D)/sample_d;    //EPC   if it is longer than nominal it wont cause tags to change inventoried flag
-      n_p_down_s     = (P_DOWN_D)/sample_d;  
+      n_p_down_s    = (P_DOWN_D)/sample_d;
+      n_cwselect_s  = T4_D/sample_d;                   //SELECT
+      n_cwsettle_s  = TS_D/sample_d;                   //SETTLE
 
       p_down.resize(n_p_down_s);        // Power down samples
-      cw_query.resize(n_cwquery_s);      // Sent after query/query rep
-      cw_ack.resize(n_cwack_s);          // Sent after ack
+      cw_query.resize(n_cwquery_s);     // Sent after query/query rep
+      cw_ack.resize(n_cwack_s);         // Sent after ack
+      cw_select.resize(n_cwselect_s);   // Sent after select
+      cw_settle.resize(n_cwsettle_s);   // Sent before first Interrogator Command (TAG wakeup time)
 
       std::fill_n(cw_query.begin(), cw_query.size(), 1);
       std::fill_n(cw_ack.begin(), cw_ack.size(), 1);
+      std::fill_n(cw_select.begin(), cw_select.size(), 1);
+      std::fill_n(cw_settle.begin(), cw_settle.size(), 1);
 
       GR_LOG_INFO(d_logger, "Carrier wave after a query transmission in samples : "     << n_cwquery_s);
       GR_LOG_INFO(d_logger, "Carrier wave after ACK transmission in samples : "        << n_cwack_s);
+      GR_LOG_INFO(d_logger, "Carrier wave after a select transmission in samples : "     << n_cwselect_s);
+      GR_LOG_INFO(d_logger, "Carrier wave before interrogator transmission in samples : "     << n_cwsettle_s);
 
       // Construct vectors (resize() default initialization is zero)
       data_0.resize(n_data0_s);
@@ -124,20 +138,34 @@ namespace gr {
       nak.insert( nak.end(), data_0.begin(), data_0.end() );
       nak.insert( nak.end(), data_0.begin(), data_0.end() );
 
-      gen_query_bits();
       gen_query_adjust_bits();
+
+      // Adam Laurie
+      gen_query_bits(select);
+      if(select)
+      {
+        // add mask to SELECT (empty mask selects all)
+        std::vector<float> mask= {};
+        for(int i= 0 ; i < select_mask.size() ; i++)
+          if(select_mask[i] == '0')
+            mask.push_back((float) 0);
+          else
+            mask.push_back((float) 1);
+        gen_select_bits(mask);
+      }
     }
 
-    void reader_impl::gen_query_bits()
+    void reader_impl::gen_query_bits(bool select)
     {
-      int num_ones = 0, num_zeros = 0;
-
       query_bits.resize(0);
       query_bits.insert(query_bits.end(), &QUERY_CODE[0], &QUERY_CODE[4]);
       query_bits.push_back(DR);
       query_bits.insert(query_bits.end(), &M[0], &M[2]);
       query_bits.push_back(TREXT);
-      query_bits.insert(query_bits.end(), &SEL[0], &SEL[2]);
+      if(select)
+        query_bits.insert(query_bits.end(), &SEL_SL[0], &SEL_SL[2]);
+      else
+        query_bits.insert(query_bits.end(), &SEL_ALL[0], &SEL_ALL[2]);
       query_bits.insert(query_bits.end(), &SESSION[0], &SESSION[2]);
       query_bits.push_back(TARGET);
     
@@ -161,6 +189,26 @@ namespace gr {
       query_adjust_bits.insert(query_adjust_bits.end(), &Q_UPDN[1][0], &Q_UPDN[1][3]);
     }
 
+
+    // Adam Laurie
+    void reader_impl::gen_select_bits(std::vector<float> & mask)
+    {
+      select_bits.resize(0);
+      select_bits.insert(select_bits.end(), &SELECT_CODE[0], &SELECT_CODE[4]);
+      select_bits.insert(select_bits.end(), &SELECT_TARGET[0], &SELECT_TARGET[3]);
+      select_bits.insert(select_bits.end(), &SELECT_ACTION[0], &SELECT_ACTION[3]);
+      select_bits.insert(select_bits.end(), &SELECT_MEM[0], &SELECT_MEM[2]);
+      select_bits.insert(select_bits.end(), &SELECT_POINT[0], &SELECT_POINT[8]);
+      // set mask size
+      for(int i= 7 ; i >= 0 ; i--)
+        select_bits.push_back((float) ((mask.size() >> i) & 0x01));
+      // set mask
+      if(mask.size() > 0)
+        select_bits.insert(select_bits.end(), mask.begin(), mask.end());
+      select_bits.push_back(SELECT_TRUNC);
+
+      crc_16_append(select_bits);
+    }
 
     /*
      * Our virtual destructor.
@@ -221,9 +269,13 @@ namespace gr {
         case START:
           GR_LOG_INFO(d_debug_logger, "START");
 
-          memcpy(&out[written], &cw_ack[0], sizeof(float) * cw_ack.size() );
-          written += cw_ack.size();
-          reader_state->gen2_logic_status = SEND_QUERY;    
+          memcpy(&out[written], &cw_settle[0], sizeof(float) * cw_settle.size() );
+          written += cw_settle.size();
+          // Adam Laurie
+          if(select)
+            reader_state->gen2_logic_status = SEND_SELECT;
+          else
+            reader_state->gen2_logic_status = SEND_QUERY;
           break;
 
         case POWER_DOWN:
@@ -239,7 +291,7 @@ namespace gr {
           written += nak.size();
           memcpy(&out[written], &cw[0], sizeof(float) * cw.size() );
           written+=cw.size();
-          reader_state->gen2_logic_status = SEND_QUERY_REP;    
+          reader_state->gen2_logic_status = SEND_QUERY_REP;
           break;
 
         case SEND_NAK_Q:
@@ -248,7 +300,36 @@ namespace gr {
           written += nak.size();
           memcpy(&out[written], &cw[0], sizeof(float) * cw.size() );
           written+=cw.size();
-          reader_state->gen2_logic_status = SEND_QUERY;    
+          reader_state->gen2_logic_status = SEND_QUERY;
+          break;
+
+        // Adam Laurie
+        case SEND_SELECT:
+          GR_LOG_INFO(d_debug_logger, "SELECT");
+          //std::cout << "SELECT" << std::endl;
+
+          memcpy(&out[written], &frame_sync[0], sizeof(float) * frame_sync.size() );
+          written+=frame_sync.size();
+
+          for(int i = 0; i < select_bits.size(); i++)
+          {
+            if(select_bits[i] == 1)
+            {
+              memcpy(&out[written], &data_1[0], sizeof(float) * data_1.size() );
+              written+=data_1.size();
+            }
+            else
+            {
+              memcpy(&out[written], &data_0[0], sizeof(float) * data_0.size() );
+              written+=data_0.size();
+            }
+          }
+
+          // gap
+          memcpy(&out[written], &cw_select[0], sizeof(float) * cw_select.size() );
+          written += cw_select.size();
+
+          reader_state->gen2_logic_status = SEND_QUERY;
           break;
 
         case SEND_QUERY:
@@ -383,6 +464,7 @@ namespace gr {
     }
 
     /* Function adapted from https://www.cgran.org/wiki/Gen2 */
+    // 5 bit CRC for QUERY
     void reader_impl::crc_append(std::vector<float> & q)
     {
        int crc[] = {1,0,0,1,0};
@@ -442,7 +524,63 @@ namespace gr {
         memcpy(crc, tmp, 5*sizeof(float));
       }
       for (int i = 4; i >= 0; i--)
-        q.push_back(crc[i]);
+        q.push_back((float) crc[i]);
+    }
+
+    // Adam Laurie
+    // 16 bit crc for SELECT
+    // test with input of '000000000100000000010' should be 0xC797
+    // warning: This code assumes no command is less then 16 bits.
+    void reader_impl::crc_16_append(std::vector<float> & q)
+    {
+      int num_bytes;
+      uint16_t crc;
+      int offset= 0;
+
+      // make a copy of the input with leading 0s for byte alignment
+      // CRC algo can't use preset for non byte aligned/length bitstream so we also need to manually
+      // XOR the 1st 16 bits of the input with the preset (0xffff)
+      if(q.size() % 8)
+        offset= (8 - (q.size() % 8));
+      int *qbuf= (int *) malloc((q.size() + offset) * sizeof(int));
+      if(!qbuf)
+      {
+        std::cout << "Memory Allocation Failed" << std::endl;
+        exit(1);
+      }
+
+      for(int i= 0 ; i < offset ; i++)
+        qbuf[i]= 0x00;
+      for(int i= 0 ; i < 16 ; i++)
+        qbuf[i + offset]= (int) q[i] ^ 0x01;
+      for(int i= 16 ; i < q.size() ; i++)
+        qbuf[i + offset]= (int) q[i];
+
+      // copy to bytes
+      num_bytes= q.size() / 8;
+      if(q.size() % 8)
+        num_bytes += 1;
+      unsigned char *buf= (unsigned char*) malloc(num_bytes * sizeof(unsigned char));
+      if(!buf)
+      {
+        std::cout << "Memory Allocation Failed" << std::endl;
+        exit(1);
+      }
+      memset(buf, 0x00, num_bytes);
+      for(int i= 0 ; i < num_bytes ; i++)
+        for(int j= 0 ; j < 8 ; ++j)
+          buf[i] += (unsigned char) (qbuf[i * 8 + j]) << 7 - j;
+
+      // Create a CRC-16/EPC function but with 0x0000 preset as we've already applied it. 
+      CRC_t<16, 0x1021, 0x0000, false, false, 0xffff> crc_epc;
+
+      crc= crc_epc.get_crc(buf, num_bytes);
+
+      // push CRC bits back to source buffer
+      for(int i= 15 ; i >= 0 ; i--)
+          q.push_back((float) ((crc >> i) & 0x01));
+      free(qbuf);
+      free(buf);
     }
   } /* namespace rfid */
 } /* namespace gr */

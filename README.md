@@ -219,6 +219,10 @@ A good read should look like this (plot generated with Octave from 'misc/data/so
 
 ![UHF Backscatter](uhf-annotated.png)
 
+or this if you have SELECT enabled (see comments in reader-bladerf.py):
+
+![UHF Backscatter with SELECT](uhf-select-annotated.png)
+
 If you are missing the EPC traces the most likely cause is a timing issue within the 'CRITICAL TIMING' section, as described above. If you are missing the RN16 traces your TAG is probably too far away and/or your TX gain is not high enough.
     
 ## Hardware:

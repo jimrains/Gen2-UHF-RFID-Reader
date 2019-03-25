@@ -48,7 +48,7 @@ namespace gr {
        * class. rfid::reader::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int sample_rate, int dac_rate);
+      static sptr make(int sample_rate, int dac_rate, bool select, const std::string &select_mask);
 
     };
 
