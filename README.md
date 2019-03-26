@@ -207,7 +207,7 @@ The reader may fail to decode a tag response for the following reasons
 
 1) Latency: For real time execution you should disable the output on the terminal. If you see debug messages, you should either install log4cpp or comment the corresponding lines in the source code e.g., GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");
 
-2) Antenna placement. Place the antennas side by side with a distance of 50-100cm between them and the tag 2m (it can detect a tag up to 6m) away facing the antennas.
+2) Antenna placement. Place the antennae side by side with a distance of 50-100cm between them and the tag 2m (it can detect a tag up to 6m) away facing the antennae.
 
 3) Parameter tuning. The most important is self.ampl which controls the power of the transmitted signal (takes values between 0 and 1).
 
@@ -241,8 +241,15 @@ If you are missing the EPC traces the most likely cause is a timing issue within
 or
 
   - 1 x bladeRF x115
-  - 2x circular polarized antennas  
+
+and
+
+  - 2x circular polarized antennae
+
+or
+
   - 1x circulator (see note above)
+  - 1x circular polarized antenna
 
 ## Tested on:
   Ubuntu 16.04 64-bit  
