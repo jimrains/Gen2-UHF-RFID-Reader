@@ -49,8 +49,8 @@ class reader_top_block(gr.top_block):
     #rt = gr.enable_realtime_scheduling() 
 
     # Adam Laurie
-    self.select = True                  # set to True to use SELECT before QUERY
-    #self.mask = '111'                   # SELECT bit mask (up to 16 bits, e.g. '10100'). empty mask matches all tags.
+    self.select = True                  # set to True to use SELECT before initial QUERY
+    #self.mask = '111'                   # SELECT bit mask (up to 256 bits, e.g. '10100'). empty mask matches all tags.
     self.mask = ''
 
     ######## Variables #########
