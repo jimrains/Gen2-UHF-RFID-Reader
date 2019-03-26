@@ -99,29 +99,37 @@ The modified reader script is in apps/reader-bladerf.py
     you may need to install boost from source as well, depending on your distro
     (I was on Ubuntu 16.04.6 LTS) and built boost version 1.69.0
 - install libbladerf from source - ensure you end up with libbladeRF.so.2 and NOT libbladeRF.so.1
-- cd Gen2-UHF-RFID-Reader/gr-rfid/  
-- mkdir build  
-- cd build/  
-- cmake ../ (logging should be enabled)  
-- sudo make install  
-- sudo ldconfig  
+```
+cd Gen2-UHF-RFID-Reader/gr-rfid/
+mkdir build
+cd build/
+cmake ../ (logging should be enabled)
+sudo make install
+sudo ldconfig
+```
 
-## Configuration (apps/reader-bladerf.py for bladeRF)
+## Configuration (apps/reader.py or apps/reader-bladerf.py for bladeRF)
 
-- Set USRPN200 address in apps/reader.py (default: 192.168.10.2)
-- Set frequency in apps/reader.py (default: 910MHz)
-- Set tx amplitude in apps/reader.py (default: 0.1)
-- Set rx gain in apps/reader.py (default: 20)
-- Set maximum number of queries in include/global_vars.h (default:1000)
-- Set number of inventory round slots in include/global_vars.h (default: 0)
+- Set USRPN200 address
+- Set frequency
+- Set tx amplitude
+- Set tx gain
+- Set rx gain
+- Set SELECT funtionality to True/False and create mask as appropriate
+- Set maximum number of queries in include/global_vars.h
+- Set number of inventory round slots in include/global_vars.h
 
 ## How to run
 
 - Real time execution:  
-If you use an SBX daughterboard uncomment  #self.source.set_auto_dc_offset(False) in reader.py file
-cd Gen2-UHF-RFID-Reader/gr-rfid/apps/    
 
-sudo GR_SCHEDULER=STS nice -n -20 python ./reader.py     
+If you use an SBX daughterboard uncomment  #self.source.set_auto_dc_offset(False) in reader.py file
+
+```
+cd Gen2-UHF-RFID-Reader/gr-rfid/apps/
+
+sudo GR_SCHEDULER=STS nice -n -20 python ./reader-bladerf.py
+```
 
 Note: if you get a core dump try running without 'GR_SCHEDULER=STS'. This is probably not ideal but seems to work!
 
