@@ -99,6 +99,16 @@ The modified reader script is in apps/reader-bladerf.py
     you may need to install boost from source as well, depending on your distro
     (I was on Ubuntu 16.04.6 LTS) and built boost version 1.69.0
 - install libbladerf from source - ensure you end up with libbladeRF.so.2 and NOT libbladeRF.so.1
+- alternatively (tested with Ubuntu 18.04) use PPA:
+```
+sudo add-apt-repository -y ppa:bladerf/bladerf
+sudo add-apt-repository -y ppa:myriadrf/drivers
+sudo add-apt-repository -y ppa:myriadrf/gnuradio
+sudo apt-get update
+sudo apt-get remove libbladerf
+sudo apt-get install libbladerf2 gr-osmosdr
+```
+Clone this repo then:
 ```
 cd Gen2-UHF-RFID-Reader/gr-rfid/
 mkdir build
